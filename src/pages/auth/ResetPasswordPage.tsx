@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
-import { authService } from '../../services/auth.service';
 import toast from 'react-hot-toast';
 import { Lock, Eye, EyeOff, KeyRound } from 'lucide-react';
-import { AxiosError } from 'axios';
+import { useResetPasswordMutation } from '../../services/authApi';
+import { getErrorMessage } from '../../utils/errorHelper';
 
 export default function ResetPasswordPage() {
   const [searchParams] = useSearchParams();
@@ -13,7 +13,7 @@ export default function ResetPasswordPage() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [resetPassword, { isLoading: isSubmitting }] = useResetPasswordMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,19 +33,14 @@ export default function ResetPasswordPage() {
       return;
     }
 
-    setIsSubmitting(true);
-
     try {
-      await authService.resetPassword(token, password);
+      await resetPassword({ token, password }).unwrap();
       toast.success('Password reset successful! Please login.');
       navigate('/login');
-    } catch (error) {
-      const axiosError = error as AxiosError<{ message: string }>;
+    } catch (error: unknown) {
       toast.error(
-        axiosError.response?.data?.message || 'Failed to reset password.'
+        getErrorMessage(error as import('@reduxjs/toolkit/query').FetchBaseQueryError, 'Failed to reset password.')
       );
-    } finally {
-      setIsSubmitting(false);
     }
   };
 

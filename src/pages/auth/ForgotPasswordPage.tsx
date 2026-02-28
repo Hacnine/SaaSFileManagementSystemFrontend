@@ -1,30 +1,26 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { authService } from '../../services/auth.service';
 import toast from 'react-hot-toast';
 import { Mail, ArrowLeft, Send } from 'lucide-react';
-import { AxiosError } from 'axios';
+import { useForgotPasswordMutation } from '../../services/authApi';
+import { getErrorMessage } from '../../utils/errorHelper';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSent, setIsSent] = useState(false);
+  const [forgotPassword, { isLoading: isSubmitting }] = useForgotPasswordMutation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
 
     try {
-      await authService.forgotPassword(email);
+      await forgotPassword(email).unwrap();
       setIsSent(true);
       toast.success('Password reset email sent!');
-    } catch (error) {
-      const axiosError = error as AxiosError<{ message: string }>;
+    } catch (error: unknown) {
       toast.error(
-        axiosError.response?.data?.message || 'Failed to send reset email.'
+        getErrorMessage(error as import('@reduxjs/toolkit/query').FetchBaseQueryError, 'Failed to send reset email.')
       );
-    } finally {
-      setIsSubmitting(false);
     }
   };
 

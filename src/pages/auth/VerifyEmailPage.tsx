@@ -1,36 +1,28 @@
-import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { authService } from '../../services/auth.service';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { useVerifyEmailQuery } from '../../services/authApi';
 
 export default function VerifyEmailPage() {
   const [searchParams] = useSearchParams();
-  const token = searchParams.get('token');
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>(
-    'loading'
-  );
-  const [message, setMessage] = useState('');
+  const token = searchParams.get('token') || '';
 
-  useEffect(() => {
-    const verify = async () => {
-      if (!token) {
-        setStatus('error');
-        setMessage('Invalid verification link.');
-        return;
-      }
+  const { data, isLoading, isError } = useVerifyEmailQuery(token, {
+    skip: !token,
+  });
 
-      try {
-        const response = await authService.verifyEmail(token);
-        setStatus('success');
-        setMessage(response.message || 'Email verified successfully!');
-      } catch {
-        setStatus('error');
-        setMessage('Invalid or expired verification link.');
-      }
-    };
+  const status = !token
+    ? 'error'
+    : isLoading
+      ? 'loading'
+      : isError
+        ? 'error'
+        : 'success';
 
-    verify();
-  }, [token]);
+  const message = !token
+    ? 'Invalid verification link.'
+    : isError
+      ? 'Invalid or expired verification link.'
+      : data?.message || 'Email verified successfully!';
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 px-4">
