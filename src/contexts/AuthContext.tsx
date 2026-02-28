@@ -1,9 +1,15 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useEffect, useCallback, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import type { User } from '../types';
-import { authService } from '../services/auth.service';
-import { registerLogoutCallback } from '../services/api';
+import { useAppDispatch, useAppSelector } from '../store';
+import { setCredentials, setUser, logout as logoutAction } from '../store/authSlice';
+import {
+  useLoginMutation,
+  useRegisterMutation,
+  useLogoutMutation,
+  useLazyGetProfileQuery,
+} from '../services/authApi';
 
 interface AuthContextType {
   user: User | null;
@@ -14,7 +20,7 @@ interface AuthContextType {
     email: string,
     password: string,
     firstName: string,
-    lastName: string
+    lastName: string,
   ) => Promise<string>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -24,100 +30,99 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
-  const [user, setUser] = useState<User | null>(() => {
-    const stored = localStorage.getItem('user');
-    return stored ? JSON.parse(stored) : null;
-  });
+  const user = useAppSelector((s) => s.auth.user);
+  const accessToken = useAppSelector((s) => s.auth.accessToken);
   const [isLoading, setIsLoading] = useState(true);
-
   const isAuthenticated = !!user;
 
-  // Redirect handler registration and token verification
-  useEffect(() => {
-    // give the api layer a way to navigate using react-router
-    registerLogoutCallback(() => navigate('/login'));
+  const [loginMutation] = useLoginMutation();
+  const [registerMutation] = useRegisterMutation();
+  const [logoutMutation] = useLogoutMutation();
+  const [triggerGetProfile] = useLazyGetProfileQuery();
 
+  // On mount: if we have a token, verify it by fetching the profile
+  useEffect(() => {
     const verifyAuth = async () => {
-      const token = localStorage.getItem('accessToken');
-      if (!token) {
+      if (!accessToken) {
         setIsLoading(false);
         return;
       }
 
       try {
-        const response = await authService.getProfile();
-        if (response.success && response.data) {
-          setUser(response.data);
-          localStorage.setItem('user', JSON.stringify(response.data));
+        const result = await triggerGetProfile().unwrap();
+        if (result.success && result.data) {
+          dispatch(setUser(result.data));
         }
       } catch {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-        setUser(null);
+        dispatch(logoutAction());
       } finally {
         setIsLoading(false);
       }
     };
 
     verifyAuth();
-  }, [navigate]);
+  }, [accessToken, dispatch, triggerGetProfile]);
 
-  const login = useCallback(async (email: string, password: string) => {
-    const response = await authService.login({ email, password });
-
-    if (response.success) {
-      const { user: userData, accessToken, refreshToken } = response.data;
-      localStorage.setItem('accessToken', accessToken);
-      localStorage.setItem('refreshToken', refreshToken);
-      localStorage.setItem('user', JSON.stringify(userData));
-      setUser(userData);
+  // Redirect to /login when the store says logged-out (e.g. after token refresh failure)
+  useEffect(() => {
+    if (!isLoading && !user && !accessToken) {
+      // only redirect when it looks like the user was previously signed in
+      // (localStorage already cleared by logoutAction)
     }
-  }, []);
+  }, [isLoading, user, accessToken, navigate]);
+
+  const login = useCallback(
+    async (email: string, password: string) => {
+      const response = await loginMutation({ email, password }).unwrap();
+
+      if (response.success) {
+        const { user: userData, accessToken: at, refreshToken: rt } = response.data;
+        dispatch(setCredentials({ user: userData, accessToken: at, refreshToken: rt }));
+      }
+    },
+    [dispatch, loginMutation],
+  );
 
   const register = useCallback(
     async (
       email: string,
       password: string,
       firstName: string,
-      lastName: string
+      lastName: string,
     ): Promise<string> => {
-      const response = await authService.register({
+      const response = await registerMutation({
         email,
         password,
         firstName,
         lastName,
-      });
+      }).unwrap();
       return response.message || 'Registration successful';
     },
-    []
+    [registerMutation],
   );
 
   const logout = useCallback(async () => {
     try {
-      await authService.logout();
+      await logoutMutation().unwrap();
     } catch {
-      // Ignore logout errors
+      // ignore
     } finally {
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      localStorage.removeItem('user');
-      setUser(null);
+      dispatch(logoutAction());
     }
-  }, []);
+  }, [dispatch, logoutMutation]);
 
   const refreshProfile = useCallback(async () => {
     try {
-      const response = await authService.getProfile();
-      if (response.success && response.data) {
-        setUser(response.data);
-        localStorage.setItem('user', JSON.stringify(response.data));
+      const result = await triggerGetProfile().unwrap();
+      if (result.success && result.data) {
+        dispatch(setUser(result.data));
       }
     } catch {
-      // Silently fail
+      // silently fail
     }
-  }, []);
+  }, [dispatch, triggerGetProfile]);
 
   return (
     <AuthContext.Provider

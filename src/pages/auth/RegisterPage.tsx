@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { UserPlus, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
-import { AxiosError } from 'axios';
+import { getErrorMessage } from '../../utils/errorHelper';
 
 export default function RegisterPage() {
   const [firstName, setFirstName] = useState('');
@@ -35,11 +35,9 @@ export default function RegisterPage() {
       const message = await register(email, password, firstName, lastName);
       toast.success(message);
       navigate('/login');
-    } catch (error) {
-      const axiosError = error as AxiosError<{ message: string }>;
+    } catch (error: unknown) {
       toast.error(
-        axiosError.response?.data?.message ||
-          'Registration failed. Please try again.'
+        getErrorMessage(error as import('@reduxjs/toolkit/query').FetchBaseQueryError, 'Registration failed. Please try again.')
       );
     } finally {
       setIsSubmitting(false);

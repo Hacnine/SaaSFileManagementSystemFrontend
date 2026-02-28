@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 import { LogIn, Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import { AxiosError } from 'axios';
+import { getErrorMessage } from '../../utils/errorHelper';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -21,10 +21,9 @@ export default function LoginPage() {
       await login(email, password);
       toast.success('Login successful!');
       navigate('/dashboard');
-    } catch (error) {
-      const axiosError = error as AxiosError<{ message: string }>;
+    } catch (error: unknown) {
       toast.error(
-        axiosError.response?.data?.message || 'Login failed. Please try again.'
+        getErrorMessage(error as import('@reduxjs/toolkit/query').FetchBaseQueryError, 'Login failed. Please try again.')
       );
     } finally {
       setIsSubmitting(false);

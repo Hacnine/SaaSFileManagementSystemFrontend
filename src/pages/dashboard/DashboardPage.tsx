@@ -1,5 +1,6 @@
 import { useAuth } from '../../contexts/AuthContext';
 import { LogOut, User, Shield } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export default function DashboardPage() {
   const { user, logout } = useAuth();
@@ -67,16 +68,23 @@ export default function DashboardPage() {
 
           <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="p-6 bg-indigo-50 rounded-xl border border-indigo-100">
-              <h3 className="font-semibold text-indigo-900">
-                {user?.role === 'ADMIN' ? 'Manage Packages' : 'My Subscription'}
-              </h3>
-              <p className="text-indigo-700 text-sm mt-1">
-                {user?.role === 'ADMIN'
-                  ? 'Create and manage subscription packages.'
-                  : user?.activePackage
-                    ? `Current: ${user.activePackage.name}`
-                    : 'No active subscription package.'}
-              </p>
+              {user?.role === 'ADMIN' ? (
+                <Link to="/dashboard/packages" className="block">
+                  <h3 className="font-semibold text-indigo-900">Manage Packages</h3>
+                  <p className="text-indigo-700 text-sm mt-1">
+                    Create and manage subscription packages.
+                  </p>
+                </Link>
+              ) : (
+                <>
+                  <h3 className="font-semibold text-indigo-900">My Subscription</h3>
+                  <p className="text-indigo-700 text-sm mt-1">
+                    {user?.activePackage
+                      ? `Current: ${user.activePackage.name}`
+                      : 'No active subscription package.'}
+                  </p>
+                </>
+              )}
             </div>
             <div className="p-6 bg-purple-50 rounded-xl border border-purple-100">
               <h3 className="font-semibold text-purple-900">My Folders</h3>
