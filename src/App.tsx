@@ -6,12 +6,16 @@ import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 import VerifyEmailPage from './pages/auth/VerifyEmailPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import PackagesPage from './pages/dashboard/PackagesPage';
+import HomePage from './pages/HomePage';
 import ProtectedRoute from './components/ProtectedRoute';
 import GuestRoute from './components/GuestRoute';
 
 export default function App() {
   return (
     <Routes>
+      {/* Public Home Page */}
+      <Route path="/" element={<HomePage />} />
+
       {/* Guest Routes (redirect to dashboard if authenticated) */}
       <Route
         path="/login"
@@ -59,9 +63,8 @@ export default function App() {
         }
       />
 
-      {/* Default redirect */}
-      <Route path="/" element={<Navigate to="/login" replace />} />
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      {/* Catch-all redirect */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
