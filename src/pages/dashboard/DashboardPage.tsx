@@ -113,25 +113,29 @@ export default function DashboardPage() {
 
               <Card className="bg-purple-500/5 border-purple-500/10">
                 <CardContent className="pt-6">
-                  <div className="flex items-center gap-3 mb-2">
-                    <FolderOpen className="w-5 h-5 text-purple-600" />
-                    <h3 className="font-semibold text-foreground">My Folders</h3>
-                  </div>
-                  <p className="text-muted-foreground text-sm">
-                    Manage your folder structure.
-                  </p>
+                  <Link to="/dashboard/files" className="block">
+                    <div className="flex items-center gap-3 mb-2">
+                      <FolderOpen className="w-5 h-5 text-purple-600" />
+                      <h3 className="font-semibold text-foreground">My Folders</h3>
+                    </div>
+                    <p className="text-muted-foreground text-sm">
+                      Manage your folder structure.
+                    </p>
+                  </Link>
                 </CardContent>
               </Card>
 
               <Card className="bg-pink-500/5 border-pink-500/10">
                 <CardContent className="pt-6">
-                  <div className="flex items-center gap-3 mb-2">
-                    <FileText className="w-5 h-5 text-pink-600" />
-                    <h3 className="font-semibold text-foreground">My Files</h3>
-                  </div>
-                  <p className="text-muted-foreground text-sm">
-                    Upload, view, and manage your files.
-                  </p>
+                  <Link to="/dashboard/files" className="block">
+                    <div className="flex items-center gap-3 mb-2">
+                      <FileText className="w-5 h-5 text-pink-600" />
+                      <h3 className="font-semibold text-foreground">My Files</h3>
+                    </div>
+                    <p className="text-muted-foreground text-sm">
+                      Upload, view, and manage your files.
+                    </p>
+                  </Link>
                 </CardContent>
               </Card>
             </div>
