@@ -47,3 +47,39 @@ export interface RegisterData {
   firstName: string;
   lastName: string;
 }
+
+export interface SubscriptionHistory {
+  id: string;
+  userId: string;
+  packageId: string;
+  startDate: string;
+  endDate?: string | null;
+  createdAt: string;
+  subscriptionPackage?: SubscriptionPackage;
+}
+
+export type FileType = 'IMAGE' | 'VIDEO' | 'PDF' | 'AUDIO';
+
+export interface Folder {
+  id: string;
+  name: string;
+  userId: string;
+  parentId: string | null;
+  nestingLevel: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FileItem {
+  id: string;
+  name: string;
+  originalName: string;
+  mimeType: string;
+  size: number;
+  path: string;
+  fileType: FileType;
+  userId: string;
+  folderId: string;
+  createdAt: string;
+  updatedAt: string;
+}

@@ -6,6 +6,7 @@ import ResetPasswordPage from './pages/auth/ResetPasswordPage';
 import VerifyEmailPage from './pages/auth/VerifyEmailPage';
 import DashboardPage from './pages/dashboard/DashboardPage';
 import PackagesPage from './pages/dashboard/PackagesPage';
+import FileManagerPage from './pages/dashboard/FileManagerPage';
 import HomePage from './pages/HomePage';
 import ProtectedRoute from './components/ProtectedRoute';
 import GuestRoute from './components/GuestRoute';
@@ -59,6 +60,15 @@ export default function App() {
         element={
           <ProtectedRoute requiredRole="ADMIN">
             <PackagesPage />
+          </ProtectedRoute>
+        }
+      />
+      {/* user file manager */}
+      <Route
+        path="/dashboard/files"
+        element={
+          <ProtectedRoute>
+            <FileManagerPage />
           </ProtectedRoute>
         }
       />
