@@ -1,6 +1,8 @@
 import { useState, useRef, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { getErrorMessage } from '@/utils/errorHelper';
 import {
   LogOut,
   User,
@@ -166,19 +168,25 @@ export default function FileManagerPage() {
     try {
       if (dialogType === 'createFolder') {
         await createFolder({ name: dialogInput }).unwrap();
+        toast.success('Folder created');
       } else if (dialogType === 'createSubFolder' && currentFolderId) {
         await createSubFolder({ name: dialogInput, parentId: currentFolderId }).unwrap();
+        toast.success('Subfolder created');
       } else if (dialogType === 'renameFolder' && selectedFolder) {
         await renameFolder({ id: selectedFolder.id, name: dialogInput }).unwrap();
+        toast.success('Folder renamed');
       } else if (dialogType === 'moveFolder' && selectedFolder) {
         await moveFolder({ id: selectedFolder.id, newParentId: dialogInput || null }).unwrap();
+        toast.success('Folder moved');
       } else if (dialogType === 'renameFile' && selectedFile) {
         await renameFile({ id: selectedFile.id, name: dialogInput }).unwrap();
+        toast.success('File renamed');
       } else if (dialogType === 'moveFile' && selectedFile) {
         await moveFile({ id: selectedFile.id, folderId: dialogInput }).unwrap();
+        toast.success('File moved');
       }
-    } catch {
-      /* error toasts could go here */
+    } catch (err) {
+      toast.error(getErrorMessage(err as any));
     }
     closeDialog();
   };
@@ -188,21 +196,32 @@ export default function FileManagerPage() {
     if (!file || !currentFolderId) return;
     try {
       await uploadFile({ folderId: currentFolderId, file }).unwrap();
-    } catch {
-      /* */
+      toast.success('File uploaded');
+    } catch (err) {
+      toast.error(getErrorMessage(err as any));
     }
     e.target.value = '';
   };
 
   const handleDeleteFolder = async (id: string) => {
     if (!confirm('Delete this folder and all its contents?')) return;
-    await deleteFolder(id);
+    try {
+      await deleteFolder(id).unwrap();
+      toast.success('Folder deleted');
+    } catch (err) {
+      toast.error(getErrorMessage(err as any));
+    }
     setActionMenuId(null);
   };
 
   const handleDeleteFile = async (id: string) => {
     if (!confirm('Delete this file?')) return;
-    await deleteFile(id);
+    try {
+      await deleteFile(id).unwrap();
+      toast.success('File deleted');
+    } catch (err) {
+      toast.error(getErrorMessage(err as any));
+    }
     setActionMenuId(null);
   };
 

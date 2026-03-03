@@ -1,6 +1,13 @@
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { useGetPublicPackagesQuery } from '@/services/publicPackagesApi';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+  useGetSubscriptionStatusQuery,
+  useSubscribePackageMutation,
+  useUnsubscribePackageMutation,
+} from '@/services/userApi';
+import toast from 'react-hot-toast';
 import {
   FolderTree,
   FileText,
@@ -26,6 +33,48 @@ import { Separator } from '@/components/ui/separator';
 export default function HomePage() {
   const { data: packages, isLoading, isError } = useGetPublicPackagesQuery();
   const { isAuthenticated } = useAuth();
+
+  const {
+    data: subscriptionStatus,
+    isLoading: statusLoading,
+  } = useGetSubscriptionStatusQuery(undefined, {
+    skip: !isAuthenticated,
+  });
+
+  const [subscribePackage, { isLoading: subscribing }] =
+    useSubscribePackageMutation();
+  const [unsubscribePackage, { isLoading: unsubscribing }] =
+    useUnsubscribePackageMutation();
+
+  const [feedback, setFeedback] = React.useState<string | null>(null);
+
+  const handleSubscribe = async (pkgId: string) => {
+    try {
+      await subscribePackage({ packageId: pkgId }).unwrap();
+      const msg = 'Subscribed successfully.';
+      setFeedback(msg);
+      toast.success(msg);
+    } catch (err: any) {
+      const msg = err?.data?.message || 'Subscription failed.';
+      setFeedback(msg);
+      toast.error(msg);
+      console.error('subscribe failed', err);
+    }
+  };
+
+  const handleUnsubscribe = async () => {
+    try {
+      await unsubscribePackage().unwrap();
+      const msg = 'Subscription cancelled.';
+      setFeedback(msg);
+      toast.success(msg);
+    } catch (err: any) {
+      const msg = err?.data?.message || 'Unsubscribe failed.';
+      setFeedback(msg);
+      toast.error(msg);
+      console.error('unsubscribe failed', err);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -124,6 +173,9 @@ export default function HomePage() {
               Choose the plan that best fits your file management needs. All
               plans include secure cloud storage and easy access.
             </p>
+            {feedback && (
+              <p className="mt-4 text-sm text-primary">{feedback}</p>
+            )}
           </div>
 
           {isLoading && (
@@ -165,7 +217,15 @@ export default function HomePage() {
                     </div>
                   )}
                   <CardHeader>
-                    <CardTitle className="text-xl">{pkg.name}</CardTitle>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-xl">{pkg.name}</CardTitle>
+                      {subscriptionStatus?.hasActivePackage &&
+                        subscriptionStatus.package?.id === pkg.id && (
+                          <Badge variant="secondary" className="text-xs">
+                            Your plan
+                          </Badge>
+                        )}
+                    </div>
                     <CardDescription>
                       Everything you need to manage your files effectively
                     </CardDescription>
@@ -250,15 +310,70 @@ export default function HomePage() {
                     </ul>
                   </CardContent>
                   <CardFooter>
-                    <Link to="/register" className="w-full">
-                      <Button
-                        className="w-full"
-                        variant={index === 1 ? 'default' : 'outline'}
-                      >
-                        Get Started
-                        <ArrowRight className="h-4 w-4" />
-                      </Button>
-                    </Link>
+                    {isAuthenticated ? (
+                      // determine subscription state
+                      (() => {
+                        const isCurrent =
+                          subscriptionStatus?.hasActivePackage &&
+                          subscriptionStatus.package?.id === pkg.id;
+                        const hasAnother =
+                          subscriptionStatus?.hasActivePackage && !isCurrent;
+                        if (statusLoading) {
+                          return (
+                            <Button className="w-full" disabled>
+                              Loading...
+                            </Button>
+                          );
+                        }
+
+                        if (isCurrent) {
+                          return (
+                            <Button
+                              className="w-full"
+                              variant="destructive"
+                              onClick={handleUnsubscribe}
+                              disabled={unsubscribing}
+                            >
+                              {unsubscribing ? 'Cancelling...' : 'Cancel'}
+                            </Button>
+                          );
+                        }
+
+                        if (hasAnother) {
+                          return (
+                            <Button
+                              className="w-full"
+                              variant="outline"
+                              disabled
+                              title="Unsubscribe from current plan first"
+                            >
+                              Subscribe
+                            </Button>
+                          );
+                        }
+
+                        return (
+                          <Button
+                            className="w-full"
+                            variant={index === 1 ? 'default' : 'outline'}
+                            onClick={() => handleSubscribe(pkg.id)}
+                            disabled={subscribing}
+                          >
+                            {subscribing ? 'Subscribing...' : 'Subscribe'}
+                          </Button>
+                        );
+                      })()
+                    ) : (
+                      <Link to="/register" className="w-full">
+                        <Button
+                          className="w-full"
+                          variant={index === 1 ? 'default' : 'outline'}
+                        >
+                          Get Started
+                          <ArrowRight className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                    )}
                   </CardFooter>
                 </Card>
               ))}

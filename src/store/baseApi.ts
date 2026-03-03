@@ -7,9 +7,9 @@ import type {
 import type { RootState } from './index';
 import { logout, setTokens } from './authSlice';
 
-const API_BASE_URL = '/api';
 
-// ── raw base query (attaches access token) ──────────────────────────────────
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: API_BASE_URL,
   prepareHeaders: (headers, { getState }) => {
@@ -68,6 +68,6 @@ const baseQueryWithReauth: BaseQueryFn<
 export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['Auth', 'Packages', 'Folders', 'Files'],
+  tagTypes: ['Auth', 'Packages', 'Folders', 'Files', 'Subscription'],
   endpoints: () => ({}),
 });
