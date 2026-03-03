@@ -142,6 +142,19 @@ export default function DashboardPage() {
                   </Link>
                 </CardContent>
               </Card>
+              {user?.role === 'ADMIN' && (
+                <Card className="bg-blue-500/5 border-blue-500/10">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center gap-3 mb-2">
+                      <Shield className="w-5 h-5 text-blue-600" />
+                      <h3 className="font-semibold text-foreground">Admin Info</h3>
+                    </div>
+                    <p className="text-muted-foreground text-sm">
+                      Admin has no restriction for folder creation and file uploading.
+                    </p>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </CardContent>
         </Card>
