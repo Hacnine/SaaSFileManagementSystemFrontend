@@ -132,6 +132,31 @@ export default function LoginPage() {
             </p>
           </CardFooter>
         </Card>
+
+        {/* Quick Login Cards */}
+        <div className="mt-6">
+          <p className="text-center text-xs text-muted-foreground mb-3 uppercase tracking-wider font-medium">
+            Demo Accounts — click to auto-fill
+          </p>
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { label: 'Admin', email: 'admin@saasfilemanager.com', password: 'Admin@123', color: 'border-primary/40 bg-primary/5 hover:bg-primary/10' },
+              { label: 'User 1', email: 'user1@saasfilemanager.com', password: 'User1@123', color: 'border-purple-400/40 bg-purple-500/5 hover:bg-purple-500/10' },
+              { label: 'User 2', email: 'user2@saasfilemanager.com', password: 'User2@123', color: 'border-pink-400/40 bg-pink-500/5 hover:bg-pink-500/10' },
+            ].map((account) => (
+              <button
+                key={account.email}
+                type="button"
+                onClick={() => { setEmail(account.email); setPassword(account.password); }}
+                className={`rounded-lg border p-3 text-left transition-colors cursor-pointer ${account.color}`}
+              >
+                <p className="text-xs font-semibold text-foreground">{account.label}</p>
+                <p className="text-[10px] text-muted-foreground truncate mt-0.5">{account.email}</p>
+                <p className="text-[10px] text-muted-foreground mt-0.5">pw: {account.password}</p>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
