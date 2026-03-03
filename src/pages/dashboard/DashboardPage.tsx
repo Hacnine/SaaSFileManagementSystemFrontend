@@ -1,5 +1,5 @@
 import { useAuth } from '@/contexts/AuthContext';
-import { LogOut, User, Shield, FolderOpen, FileText, Package } from 'lucide-react';
+import { LogOut, User, Shield, FolderOpen, FileText, Package, Home } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -28,10 +28,14 @@ export default function DashboardPage() {
                   SF
                 </span>
               </div>
+             
               <span className="font-semibold text-foreground">
                 SaaS File Manager
               </span>
             </div>
+              <Link to="/" className="font-semibold text-foreground hover:underline flex items-center gap-1">
+              <Home/>  Home
+              </Link>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 {user?.role === 'ADMIN' ? (
@@ -101,11 +105,11 @@ export default function DashboardPage() {
                           My Subscription
                         </h3>
                       </div>
-                      <p className="text-muted-foreground text-sm">
+                      <Link to="/"  className="text-muted-foreground text-sm">
                         {user?.activePackage
                           ? `Current: ${user.activePackage.name}`
-                          : 'No active subscription package.'}
-                      </p>
+                          : 'No active subscription package. Please subscribe to a package.'}
+                      </Link>
                     </>
                   )}
                 </CardContent>
