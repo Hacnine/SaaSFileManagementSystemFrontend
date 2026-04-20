@@ -35,6 +35,8 @@ import { Separator } from '@/components/ui/separator';
 export default function HomePage() {
   const { data: packages, isLoading, isError } = useGetPublicPackagesQuery();
   const { isAuthenticated } = useAuth();
+  const [mounted, setMounted] = React.useState(false);
+  React.useEffect(() => { setMounted(true); }, []);
 
   const {
     data: subscriptionStatus,
@@ -93,7 +95,7 @@ export default function HomePage() {
               </span>
             </div>
             <div className="flex items-center gap-3">
-              {isAuthenticated ? (
+              {mounted && isAuthenticated ? (
                 <Link href="/dashboard">
                   <Button>
                     Dashboard
@@ -134,7 +136,7 @@ export default function HomePage() {
             that fits your needs and start managing your files today.
           </p>
           <div className="flex items-center justify-center gap-3">
-            {isAuthenticated ? (
+            {mounted && isAuthenticated ? (
               <Link href="/dashboard">
                 <Button size="lg">
                   Go to Dashboard
@@ -310,7 +312,7 @@ export default function HomePage() {
                     </ul>
                   </CardContent>
                   <CardFooter>
-                    {isAuthenticated ? (
+                    {mounted && isAuthenticated ? (
                       (() => {
                         const isCurrent =
                           subscriptionStatus?.hasActivePackage &&
