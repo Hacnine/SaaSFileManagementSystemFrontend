@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import {
   useGetPackagesQuery,
@@ -7,7 +9,8 @@ import {
 } from '@/services/packagesApi';
 import { SubscriptionPackage } from '@/types';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { ArrowLeft, Pencil, Trash2, Plus, Loader2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Button } from '@/components/ui/button';
@@ -41,13 +44,13 @@ import { Badge } from '@/components/ui/badge';
 
 export default function PackagesPage() {
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   useEffect(() => {
     if (user && user.role !== 'ADMIN') {
-      navigate('/dashboard');
+      router.replace('/dashboard');
     }
-  }, [user, navigate]);
+  }, [user, router]);
 
   const { data: packages, isLoading, error } = useGetPackagesQuery();
   const [createPackage, { isLoading: isCreating }] =
@@ -136,7 +139,7 @@ export default function PackagesPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <Link to="/dashboard">
+            <Link href="/dashboard">
               <Button variant="ghost" size="icon">
                 <ArrowLeft className="h-4 w-4" />
               </Button>
@@ -350,14 +353,14 @@ export default function PackagesPage() {
                         <div className="flex items-center justify-end gap-1">
                           <Button
                             variant="ghost"
-                            size="icon-sm"
+                            size="icon"
                             onClick={() => handleEdit(pkg)}
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="ghost"
-                            size="icon-sm"
+                            size="icon"
                             onClick={() => confirmDelete(pkg.id)}
                             className="text-destructive hover:text-destructive"
                           >

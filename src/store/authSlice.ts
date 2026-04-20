@@ -7,18 +7,41 @@ export interface AuthState {
   refreshToken: string | null;
 }
 
-// hydrate from localStorage on startup
+function getLocalItem(key: string): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function setLocalItem(key: string, value: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(key, value);
+  } catch {
+    // ignore
+  }
+}
+
+function removeLocalItem(key: string): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    // ignore
+  }
+}
+
+// hydrate from localStorage on startup (SSR-safe)
 const initialState: AuthState = {
   user: (() => {
-    try {
-      const stored = localStorage.getItem('user');
-      return stored ? JSON.parse(stored) : null;
-    } catch {
-      return null;
-    }
+    const stored = getLocalItem('user');
+    return stored ? JSON.parse(stored) : null;
   })(),
-  accessToken: localStorage.getItem('accessToken'),
-  refreshToken: localStorage.getItem('refreshToken'),
+  accessToken: getLocalItem('accessToken'),
+  refreshToken: getLocalItem('refreshToken'),
 };
 
 const authSlice = createSlice({
@@ -33,9 +56,9 @@ const authSlice = createSlice({
       state.accessToken = action.payload.accessToken;
       state.refreshToken = action.payload.refreshToken;
 
-      localStorage.setItem('user', JSON.stringify(action.payload.user));
-      localStorage.setItem('accessToken', action.payload.accessToken);
-      localStorage.setItem('refreshToken', action.payload.refreshToken);
+      setLocalItem('user', JSON.stringify(action.payload.user));
+      setLocalItem('accessToken', action.payload.accessToken);
+      setLocalItem('refreshToken', action.payload.refreshToken);
     },
 
     setTokens(
@@ -45,13 +68,13 @@ const authSlice = createSlice({
       state.accessToken = action.payload.accessToken;
       state.refreshToken = action.payload.refreshToken;
 
-      localStorage.setItem('accessToken', action.payload.accessToken);
-      localStorage.setItem('refreshToken', action.payload.refreshToken);
+      setLocalItem('accessToken', action.payload.accessToken);
+      setLocalItem('refreshToken', action.payload.refreshToken);
     },
 
     setUser(state, action: PayloadAction<User>) {
       state.user = action.payload;
-      localStorage.setItem('user', JSON.stringify(action.payload));
+      setLocalItem('user', JSON.stringify(action.payload));
     },
 
     logout(state) {
@@ -59,9 +82,9 @@ const authSlice = createSlice({
       state.accessToken = null;
       state.refreshToken = null;
 
-      localStorage.removeItem('user');
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
+      removeLocalItem('user');
+      removeLocalItem('accessToken');
+      removeLocalItem('refreshToken');
     },
   },
 });

@@ -1,5 +1,7 @@
+'use client';
+
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { useGetPublicPackagesQuery } from '@/services/publicPackagesApi';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -54,11 +56,10 @@ export default function HomePage() {
       const msg = 'Subscribed successfully.';
       setFeedback(msg);
       toast.success(msg);
-    } catch (err: any) {
-      const msg = err?.data?.message || 'Subscription failed.';
+    } catch (err: unknown) {
+      const msg = (err as { data?: { message?: string } })?.data?.message || 'Subscription failed.';
       setFeedback(msg);
       toast.error(msg);
-      console.error('subscribe failed', err);
     }
   };
 
@@ -68,11 +69,10 @@ export default function HomePage() {
       const msg = 'Subscription cancelled.';
       setFeedback(msg);
       toast.success(msg);
-    } catch (err: any) {
-      const msg = err?.data?.message || 'Unsubscribe failed.';
+    } catch (err: unknown) {
+      const msg = (err as { data?: { message?: string } })?.data?.message || 'Unsubscribe failed.';
       setFeedback(msg);
       toast.error(msg);
-      console.error('unsubscribe failed', err);
     }
   };
 
@@ -94,7 +94,7 @@ export default function HomePage() {
             </div>
             <div className="flex items-center gap-3">
               {isAuthenticated ? (
-                <Link to="/dashboard">
+                <Link href="/dashboard">
                   <Button>
                     Dashboard
                     <ArrowRight className="h-4 w-4" />
@@ -102,13 +102,13 @@ export default function HomePage() {
                 </Link>
               ) : (
                 <>
-                  <Link to="/login">
+                  <Link href="/login">
                     <Button variant="ghost">
                       <LogIn className="h-4 w-4" />
                       Sign In
                     </Button>
                   </Link>
-                  <Link to="/register">
+                  <Link href="/register">
                     <Button>Get Started</Button>
                   </Link>
                 </>
@@ -127,7 +127,7 @@ export default function HomePage() {
           <h1 className="text-4xl sm:text-5xl font-bold text-foreground tracking-tight mb-4">
             Manage Your Files
             <br />
-            <span className="text-primary">Simply & Securely</span>
+            <span className="text-primary">Simply &amp; Securely</span>
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto mb-8">
             Organize, store, and access your files from anywhere. Choose a plan
@@ -135,7 +135,7 @@ export default function HomePage() {
           </p>
           <div className="flex items-center justify-center gap-3">
             {isAuthenticated ? (
-              <Link to="/dashboard">
+              <Link href="/dashboard">
                 <Button size="lg">
                   Go to Dashboard
                   <ArrowRight className="h-4 w-4" />
@@ -143,13 +143,13 @@ export default function HomePage() {
               </Link>
             ) : (
               <>
-                <Link to="/register">
+                <Link href="/register">
                   <Button size="lg">
                     Get Started Free
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
-                <Link to="/login">
+                <Link href="/login">
                   <Button variant="outline" size="lg">
                     Sign In
                   </Button>
@@ -311,7 +311,6 @@ export default function HomePage() {
                   </CardContent>
                   <CardFooter>
                     {isAuthenticated ? (
-                      // determine subscription state
                       (() => {
                         const isCurrent =
                           subscriptionStatus?.hasActivePackage &&
@@ -364,7 +363,7 @@ export default function HomePage() {
                         );
                       })()
                     ) : (
-                      <Link to="/register" className="w-full">
+                      <Link href="/register" className="w-full">
                         <Button
                           className="w-full"
                           variant={index === 1 ? 'default' : 'outline'}

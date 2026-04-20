@@ -1,5 +1,8 @@
+'use client';
+
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
+import GuestGuard from '@/components/GuestGuard';
 import toast from 'react-hot-toast';
 import { Mail, ArrowLeft, Send, CheckCircle, Loader2 } from 'lucide-react';
 import { useForgotPasswordMutation } from '@/services/authApi';
@@ -15,8 +18,9 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 
-export default function ForgotPasswordPage() {
+function ForgotPasswordForm() {
   const [email, setEmail] = useState('');
   const [isSent, setIsSent] = useState(false);
   const [forgotPassword, { isLoading: isSubmitting }] =
@@ -32,7 +36,7 @@ export default function ForgotPasswordPage() {
     } catch (error: unknown) {
       toast.error(
         getErrorMessage(
-          error as import('@reduxjs/toolkit/query').FetchBaseQueryError,
+          error as FetchBaseQueryError,
           'Failed to send reset email.',
         ),
       );
@@ -91,36 +95,34 @@ export default function ForgotPasswordPage() {
               </form>
             ) : (
               <div className="text-center py-4">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle className="w-8 h-8 text-green-600" />
-                </div>
-                <p className="text-muted-foreground mb-4">
-                  We've sent a password reset link to{' '}
-                  <strong className="text-foreground">{email}</strong>. Please
-                  check your inbox and spam folder.
+                <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-3" />
+                <p className="text-sm text-muted-foreground">
+                  We&apos;ve sent a password reset link to <strong>{email}</strong>.
+                  Please check your inbox.
                 </p>
-                <Button
-                  variant="ghost"
-                  onClick={() => setIsSent(false)}
-                  className="text-sm"
-                >
-                  Didn't receive it? Try again
-                </Button>
               </div>
             )}
           </CardContent>
 
           <CardFooter className="justify-center">
             <Link
-              to="/login"
-              className="inline-flex items-center gap-1 text-sm text-primary hover:underline font-medium"
+              href="/login"
+              className="flex items-center gap-1 text-sm text-primary hover:underline font-medium"
             >
-              <ArrowLeft className="w-4 h-4" />
-              Back to login
+              <ArrowLeft className="h-4 w-4" />
+              Back to Sign In
             </Link>
           </CardFooter>
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function ForgotPasswordPage() {
+  return (
+    <GuestGuard>
+      <ForgotPasswordForm />
+    </GuestGuard>
   );
 }

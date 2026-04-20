@@ -1,6 +1,8 @@
+'use client';
+
 import { useState, useRef, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { getErrorMessage } from '@/utils/errorHelper';
 import {
@@ -57,6 +59,7 @@ import {
   useDeleteFileMutation,
 } from '@/services/fileManagerApi';
 import type { Folder, FileItem } from '@/types';
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 
 // ── helpers ────────────────────────────────────────────────────────────────
 function fileTypeIcon(fileType: string) {
@@ -74,10 +77,11 @@ function fileTypeIcon(fileType: string) {
   }
 }
 
-function formatSize(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+function formatSize(bytes: number | string) {
+  const b = typeof bytes === 'string' ? parseInt(bytes, 10) : bytes;
+  if (b < 1024) return `${b} B`;
+  if (b < 1024 * 1024) return `${(b / 1024).toFixed(1)} KB`;
+  return `${(b / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 // ── component ──────────────────────────────────────────────────────────────
@@ -186,7 +190,7 @@ export default function FileManagerPage() {
         toast.success('File moved');
       }
     } catch (err) {
-      toast.error(getErrorMessage(err as any));
+      toast.error(getErrorMessage(err as FetchBaseQueryError));
     }
     closeDialog();
   };
@@ -198,7 +202,7 @@ export default function FileManagerPage() {
       await uploadFile({ folderId: currentFolderId, file }).unwrap();
       toast.success('File uploaded');
     } catch (err) {
-      toast.error(getErrorMessage(err as any));
+      toast.error(getErrorMessage(err as FetchBaseQueryError));
     }
     e.target.value = '';
   };
@@ -209,7 +213,7 @@ export default function FileManagerPage() {
       await deleteFolder(id).unwrap();
       toast.success('Folder deleted');
     } catch (err) {
-      toast.error(getErrorMessage(err as any));
+      toast.error(getErrorMessage(err as FetchBaseQueryError));
     }
     setActionMenuId(null);
   };
@@ -220,7 +224,7 @@ export default function FileManagerPage() {
       await deleteFile(id).unwrap();
       toast.success('File deleted');
     } catch (err) {
-      toast.error(getErrorMessage(err as any));
+      toast.error(getErrorMessage(err as FetchBaseQueryError));
     }
     setActionMenuId(null);
   };
@@ -232,7 +236,7 @@ export default function FileManagerPage() {
       <nav className="border-b bg-card">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <Link to="/dashboard" className="flex items-center gap-2">
+            <Link href="/dashboard" className="flex items-center gap-2">
               <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
                 <span className="text-primary-foreground font-bold text-sm">SF</span>
               </div>

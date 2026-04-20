@@ -1,5 +1,6 @@
+'use client';
+
 import { createContext, useContext, useEffect, useCallback, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import type { User } from '../types';
 import { useAppDispatch, useAppSelector } from '../store';
@@ -29,7 +30,6 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
   const user = useAppSelector((s) => s.auth.user);
@@ -71,7 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // only redirect when it looks like the user was previously signed in
       // (localStorage already cleared by logoutAction)
     }
-  }, [isLoading, user, accessToken, navigate]);
+  }, [isLoading, user, accessToken]);
 
   const login = useCallback(
     async (email: string, password: string) => {

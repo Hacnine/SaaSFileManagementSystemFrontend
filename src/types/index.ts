@@ -75,7 +75,7 @@ export interface FileItem {
   name: string;
   originalName: string;
   mimeType: string;
-  size: number;
+  size: number | string;
   path: string;
   fileType: FileType;
   userId: string;
