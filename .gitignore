@@ -29,6 +29,9 @@ jspm_packages/
 # dist or build directory
 /dist
 /build
+.next
+
+tsconfig.tsbuildinfo
 
 # Vite cache
 node_modules/.vite
