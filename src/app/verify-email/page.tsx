@@ -1,4 +1,8 @@
-import { useSearchParams, Link } from 'react-router-dom';
+'use client';
+
+import { Suspense } from 'react';
+import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 import { useVerifyEmailQuery } from '@/services/authApi';
 import { Button } from '@/components/ui/button';
@@ -10,8 +14,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 
-export default function VerifyEmailPage() {
-  const [searchParams] = useSearchParams();
+function VerifyEmailContent() {
+  const searchParams = useSearchParams();
   const token = searchParams.get('token') || '';
 
   const { data, isLoading, isError } = useVerifyEmailQuery(token, {
@@ -60,7 +64,7 @@ export default function VerifyEmailPage() {
                 <CardDescription>{message}</CardDescription>
               </CardHeader>
               <CardContent>
-                <Link to="/login">
+                <Link href="/login">
                   <Button className="w-full">Go to Login</Button>
                 </Link>
               </CardContent>
@@ -77,7 +81,7 @@ export default function VerifyEmailPage() {
                 <CardDescription>{message}</CardDescription>
               </CardHeader>
               <CardContent>
-                <Link to="/login">
+                <Link href="/login">
                   <Button className="w-full">Go to Login</Button>
                 </Link>
               </CardContent>
@@ -89,4 +93,14 @@ export default function VerifyEmailPage() {
   );
 }
 
-
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      </div>
+    }>
+      <VerifyEmailContent />
+    </Suspense>
+  );
+}

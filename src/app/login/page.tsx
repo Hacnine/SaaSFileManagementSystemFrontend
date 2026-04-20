@@ -1,6 +1,10 @@
+'use client';
+
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import GuestGuard from '@/components/GuestGuard';
 import toast from 'react-hot-toast';
 import { LogIn, Mail, Lock, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { getErrorMessage } from '@/utils/errorHelper';
@@ -15,14 +19,15 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 
-export default function LoginPage() {
+function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { login } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,11 +36,11 @@ export default function LoginPage() {
     try {
       await login(email, password);
       toast.success('Login successful!');
-      navigate('/dashboard');
+      router.push('/dashboard');
     } catch (error: unknown) {
       toast.error(
         getErrorMessage(
-          error as import('@reduxjs/toolkit/query').FetchBaseQueryError,
+          error as FetchBaseQueryError,
           'Login failed. Please try again.',
         ),
       );
@@ -103,7 +108,7 @@ export default function LoginPage() {
 
               <div className="flex items-center justify-end">
                 <Link
-                  to="/forgot-password"
+                  href="/forgot-password"
                   className="text-sm text-primary hover:underline font-medium"
                 >
                   Forgot password?
@@ -125,39 +130,22 @@ export default function LoginPage() {
 
           <CardFooter className="justify-center">
             <p className="text-sm text-muted-foreground">
-              Don't have an account?{' '}
-              <Link to="/register" className="text-primary hover:underline font-medium">
-                Create one
+              Don&apos;t have an account?{' '}
+              <Link href="/register" className="text-primary hover:underline font-medium">
+                Sign up
               </Link>
             </p>
           </CardFooter>
         </Card>
-
-        {/* Quick Login Cards */}
-        <div className="mt-6">
-          <p className="text-center text-xs text-muted-foreground mb-3 uppercase tracking-wider font-medium">
-            Demo Accounts — click to auto-fill
-          </p>
-          <div className="grid grid-cols-3 gap-2">
-            {[
-              { label: 'Admin', email: 'admin@saasfilemanager.com', password: 'Admin@123', color: 'border-primary/40 bg-primary/5 hover:bg-primary/10' },
-              { label: 'User 1', email: 'user1@saasfilemanager.com', password: 'User1@123', color: 'border-purple-400/40 bg-purple-500/5 hover:bg-purple-500/10' },
-              { label: 'User 2', email: 'user2@saasfilemanager.com', password: 'User2@123', color: 'border-pink-400/40 bg-pink-500/5 hover:bg-pink-500/10' },
-            ].map((account) => (
-              <button
-                key={account.email}
-                type="button"
-                onClick={() => { setEmail(account.email); setPassword(account.password); }}
-                className={`rounded-lg border p-3 text-left transition-colors cursor-pointer ${account.color}`}
-              >
-                <p className="text-xs font-semibold text-foreground">{account.label}</p>
-                <p className="text-[10px] text-muted-foreground truncate mt-0.5">{account.email}</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5">pw: {account.password}</p>
-              </button>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <GuestGuard>
+      <LoginForm />
+    </GuestGuard>
   );
 }

@@ -1,5 +1,8 @@
-import { useState } from 'react';
-import { useSearchParams, Link, useNavigate } from 'react-router-dom';
+'use client';
+
+import { useState, Suspense } from 'react';
+import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { Lock, Eye, EyeOff, KeyRound, Loader2 } from 'lucide-react';
 import { useResetPasswordMutation } from '@/services/authApi';
@@ -14,11 +17,12 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 
-export default function ResetPasswordPage() {
-  const [searchParams] = useSearchParams();
+function ResetPasswordForm() {
+  const searchParams = useSearchParams();
   const token = searchParams.get('token');
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -47,11 +51,11 @@ export default function ResetPasswordPage() {
     try {
       await resetPassword({ token, password }).unwrap();
       toast.success('Password reset successful! Please login.');
-      navigate('/login');
+      router.push('/login');
     } catch (error: unknown) {
       toast.error(
         getErrorMessage(
-          error as import('@reduxjs/toolkit/query').FetchBaseQueryError,
+          error as FetchBaseQueryError,
           'Failed to reset password.',
         ),
       );
@@ -69,7 +73,7 @@ export default function ResetPasswordPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Link to="/forgot-password">
+            <Link href="/forgot-password">
               <Button variant="outline">Request a new reset link</Button>
             </Link>
           </CardContent>
@@ -152,5 +156,17 @@ export default function ResetPasswordPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      </div>
+    }>
+      <ResetPasswordForm />
+    </Suspense>
   );
 }

@@ -1,6 +1,10 @@
+'use client';
+
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import GuestGuard from '@/components/GuestGuard';
 import toast from 'react-hot-toast';
 import { UserPlus, Mail, Lock, User, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { getErrorMessage } from '@/utils/errorHelper';
@@ -15,8 +19,9 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import type { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 
-export default function RegisterPage() {
+function RegisterForm() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -25,7 +30,7 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { register } = useAuth();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,11 +50,11 @@ export default function RegisterPage() {
     try {
       const message = await register(email, password, firstName, lastName);
       toast.success(message);
-      navigate('/login');
+      router.push('/login');
     } catch (error: unknown) {
       toast.error(
         getErrorMessage(
-          error as import('@reduxjs/toolkit/query').FetchBaseQueryError,
+          error as FetchBaseQueryError,
           'Registration failed. Please try again.',
         ),
       );
@@ -184,7 +189,7 @@ export default function RegisterPage() {
           <CardFooter className="justify-center">
             <p className="text-sm text-muted-foreground">
               Already have an account?{' '}
-              <Link to="/login" className="text-primary hover:underline font-medium">
+              <Link href="/login" className="text-primary hover:underline font-medium">
                 Sign in
               </Link>
             </p>
@@ -192,5 +197,13 @@ export default function RegisterPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function RegisterPage() {
+  return (
+    <GuestGuard>
+      <RegisterForm />
+    </GuestGuard>
   );
 }

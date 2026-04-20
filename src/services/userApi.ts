@@ -70,7 +70,7 @@ export const userApi = baseApi.injectEndpoints({
     }),
 
     getFolders: builder.query<{ folders: any[] }, void>({
-      query: () => '/users/folders',
+      query: () => '/user/folders',
       providesTags: ['Folders'],
     }),
 

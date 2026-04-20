@@ -1,6 +1,8 @@
+'use client';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { LogOut, User, Shield, FolderOpen, FileText, Package, Home } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -28,14 +30,13 @@ export default function DashboardPage() {
                   SF
                 </span>
               </div>
-             
               <span className="font-semibold text-foreground">
                 SaaS File Manager
               </span>
             </div>
-              <Link to="/" className="font-semibold text-foreground hover:underline flex items-center gap-1">
-              <Home/>  Home
-              </Link>
+            <Link href="/" className="font-semibold text-foreground hover:underline flex items-center gap-1">
+              <Home /> Home
+            </Link>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 {user?.role === 'ADMIN' ? (
@@ -86,7 +87,7 @@ export default function DashboardPage() {
               <Card className="bg-primary/5 border-primary/10">
                 <CardContent className="pt-6">
                   {user?.role === 'ADMIN' ? (
-                    <Link to="/dashboard/packages" className="block">
+                    <Link href="/dashboard/packages" className="block">
                       <div className="flex items-center gap-3 mb-2">
                         <Package className="w-5 h-5 text-primary" />
                         <h3 className="font-semibold text-foreground">
@@ -105,7 +106,7 @@ export default function DashboardPage() {
                           My Subscription
                         </h3>
                       </div>
-                      <Link to="/"  className="text-muted-foreground text-sm">
+                      <Link href="/" className="text-muted-foreground text-sm">
                         {user?.activePackage
                           ? `Current: ${user.activePackage.name}`
                           : 'No active subscription package. Please subscribe to a package.'}
@@ -117,7 +118,7 @@ export default function DashboardPage() {
 
               <Card className="bg-purple-500/5 border-purple-500/10">
                 <CardContent className="pt-6">
-                  <Link to="/dashboard/files" className="block">
+                  <Link href="/dashboard/files" className="block">
                     <div className="flex items-center gap-3 mb-2">
                       <FolderOpen className="w-5 h-5 text-purple-600" />
                       <h3 className="font-semibold text-foreground">My Folders</h3>
@@ -131,7 +132,7 @@ export default function DashboardPage() {
 
               <Card className="bg-pink-500/5 border-pink-500/10">
                 <CardContent className="pt-6">
-                  <Link to="/dashboard/files" className="block">
+                  <Link href="/dashboard/files" className="block">
                     <div className="flex items-center gap-3 mb-2">
                       <FileText className="w-5 h-5 text-pink-600" />
                       <h3 className="font-semibold text-foreground">My Files</h3>
@@ -142,6 +143,7 @@ export default function DashboardPage() {
                   </Link>
                 </CardContent>
               </Card>
+
               {user?.role === 'ADMIN' && (
                 <Card className="bg-blue-500/5 border-blue-500/10">
                   <CardContent className="pt-6">

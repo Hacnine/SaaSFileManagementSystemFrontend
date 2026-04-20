@@ -1,13 +1,23 @@
-import { Navigate } from 'react-router-dom';
+'use client';
+
+import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 
-interface GuestRouteProps {
+interface GuestGuardProps {
   children: React.ReactNode;
 }
 
-export default function GuestRoute({ children }: GuestRouteProps) {
+export default function GuestGuard({ children }: GuestGuardProps) {
   const { isLoading, isAuthenticated } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.replace('/dashboard');
+    }
+  }, [isLoading, isAuthenticated, router]);
 
   if (isLoading) {
     return (
@@ -18,7 +28,7 @@ export default function GuestRoute({ children }: GuestRouteProps) {
   }
 
   if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
+    return null;
   }
 
   return <>{children}</>;
