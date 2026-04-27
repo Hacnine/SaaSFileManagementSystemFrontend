@@ -5,17 +5,26 @@ import type { SerializedError } from '@reduxjs/toolkit';
  * Extract a user-friendly message from an RTK Query error.
  */
 export function getErrorMessage(
-  error: FetchBaseQueryError | SerializedError | undefined,
+  error: unknown,
   fallback = 'Something went wrong.',
 ): string {
   if (!error) return fallback;
 
-  if ('status' in error) {
+  if (typeof error === 'object' && error !== null && 'status' in error) {
     // FetchBaseQueryError
-    const data = error.data as { message?: string } | undefined;
+    const data = (error as FetchBaseQueryError).data as
+      | { message?: string }
+      | undefined;
     return data?.message || fallback;
   }
 
-  // SerializedError
-  return error.message || fallback;
+  if (typeof error === 'object' && error !== null && 'message' in error) {
+    return (error as SerializedError).message || fallback;
+  }
+
+  if (typeof error === 'string') {
+    return error;
+  }
+
+  return fallback;
 }

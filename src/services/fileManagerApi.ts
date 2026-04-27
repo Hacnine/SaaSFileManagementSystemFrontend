@@ -1,5 +1,5 @@
 import { baseApi } from '@/store/baseApi';
-import type { Folder, FileItem } from '@/types';
+import type { Folder, FileItem, TrashContents } from '@/types';
 
 export const fileManagerApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -89,6 +89,29 @@ export const fileManagerApi = baseApi.injectEndpoints({
       query: (id) => ({ url: `/user/files/${id}`, method: 'DELETE' }),
       invalidatesTags: ['Files'],
     }),
+
+    getTrash: builder.query<TrashContents, void>({
+      query: () => '/user/trash',
+      transformResponse: (res: { success: boolean; data?: TrashContents } | TrashContents) =>
+        'data' in res && res.data ? res.data : (res as TrashContents),
+      providesTags: ['Folders', 'Files'],
+    }),
+
+    restoreFromTrash: builder.mutation<unknown, { type: 'file' | 'folder'; id: string }>({
+      query: ({ type, id }) => ({
+        url: `/user/trash/${type}s/${id}/restore`,
+        method: 'PATCH',
+      }),
+      invalidatesTags: ['Folders', 'Files'],
+    }),
+
+    emptyTrash: builder.mutation<void, void>({
+      query: () => ({
+        url: '/user/trash',
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Folders', 'Files'],
+    }),
   }),
 });
 
@@ -104,4 +127,7 @@ export const {
   useRenameFileMutation,
   useMoveFileMutation,
   useDeleteFileMutation,
+  useGetTrashQuery,
+  useRestoreFromTrashMutation,
+  useEmptyTrashMutation,
 } = fileManagerApi;
